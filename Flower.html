@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A tiny present for you 🖤</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+            font-family: 'Dancing Script', cursive;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+        }
+
+        .mensaje-container {
+            position: absolute;
+            bottom: 5%;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .mensaje {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            background: linear-gradient(to bottom, #ffffff, #aaaaaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            animation: aparecer 1.5s ease-out forwards 1.2s;
+        }
+
+        .petalo-caida {
+            position: absolute;
+            border-radius: 150% 0 150% 0;
+            z-index: 5;
+            animation: lluvia linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes lluvia {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.4; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="florCanvas"></canvas>
+
+    <div class="mensaje-container">
+        <div class="mensaje">A flower for you, twin :D</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('florCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function iniciarAnimacion() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 - 80; 
+            let expansion = 0;
+            const escalaGigante = 1.7; 
+
+            function dibujar() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (expansion < 1) expansion += 0.04;
+
+                // 1. Dibujar Tallo
+                dibujarTallo(centerX, centerY, expansion * escalaGigante);
+
+                // 2. Dibujar los 5 pétalos
+                for (let i = 0; i < 5; i++) {
+                    const angulo = (i * 72) * Math.PI / 180;
+                    dibujarPetalo(centerX, centerY, angulo, expansion * escalaGigante);
+                }
+
+                // 3. Centro de la flor
+                if (expansion >= 0.8) {
+                    ctx.save();
+                    ctx.translate(centerX, centerY);
+                    ctx.scale(expansion * escalaGigante, expansion * escalaGigante);
+                    
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+                    ctx.fillStyle = '#000000';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                    ctx.fillStyle = '#f0f0f0';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(-6, -6, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                requestAnimationFrame(dibujar);
+            }
+
+            function dibujarTallo(tx, ty, scale) {
+                ctx.save();
+                ctx.translate(tx, ty);
+                ctx.scale(scale, scale);
+
+                // Tallo principal
+                ctx.beginPath();
+                ctx.lineWidth = 10;
+                ctx.strokeStyle = "#000000";
+                ctx.lineCap = "round";
+                ctx.moveTo(0, 10);
+                ctx.quadraticCurveTo(20, 100, 0, 250); 
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = "#dddddd"; 
+                ctx.moveTo(0, 10);
+                ctx.quadraticCurveTo(20, 100, 0, 250);
+                ctx.stroke();
+
+                // --- HOJA MOVIDA A LA IZQUIERDA ---
+                ctx.save();
+                ctx.translate(-15, 120); // Posición a la izquierda
+                ctx.rotate(Math.PI / 1.2); // Rotación ajustada
+                ctx.beginPath();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = "#000000";
+                ctx.fillStyle = "#ffffff";
+                ctx.ellipse(0, 0, 30, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.restore();
+            }
+
+            function dibujarPetalo(px, py, angulo, scale) {
+                ctx.save();
+                ctx.translate(px, py);
+                ctx.rotate(angulo);
+                ctx.scale(scale, scale);
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-60, -100, 60, -100, 0, 0);
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#000000';
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-35, -60, 35, -60, 0, 0);
+                ctx.fillStyle = '#dddddd';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.ellipse(0, -65, 15, 8, 0, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fill();
+
+                dibujarEstrella(25, -50, 4);
+                
+                ctx.restore();
+            }
+
+            function dibujarEstrella(ex, ey, r) {
+                ctx.save();
+                ctx.translate(ex, ey);
+                ctx.fillStyle = "black";
+                for (let i = 0; i < 4; i++) {
+                    ctx.rotate(Math.PI / 2);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, r, r/4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            dibujar();
+        }
+
+        function crearPetaloLluvia() {
+            const p = document.createElement('div');
+            p.className = 'petalo-caida';
+            const size = Math.random() * 12 + 8;
+            p.style.width = size + 'px';
+            p.style.height = (size * 1.2) + 'px';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.animationDuration = Math.random() * 3 + 4 + 's';
+            p.style.backgroundColor = ['#ffffff', '#cccccc', '#999999'][Math.floor(Math.random() * 3)];
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 7000);
+        }
+
+        setInterval(crearPetaloLluvia, 300);
+        window.onload = iniciarAnimacion;
+    </script>
+</body>
+</html>
